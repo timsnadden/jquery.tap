@@ -82,6 +82,25 @@
     var EVENT_VARIABLES = 'clientX clientY screenX screenY pageX pageY'.split(' ');
 
     /**
+     * Fetch index of value from array
+     *
+     * @param {Array} array
+     * @param {*} value
+     * @returns {number}
+     * @private
+     */
+    var _indexOf = function(array, value) {
+        var index;
+        if (Array.prototype.indexOf) {
+            index = array.indexOf(value);
+        } else {
+            index = $.inArray(value, array);
+        }
+
+        return index;
+    };
+
+    /**
      * Object for tracking current touch settings (x, y, target, canceled, etc)
      *
      * @type {object}
@@ -319,7 +338,7 @@
          */
         var _onClick = function(e) {
             var originalEvent = e.originalEvent;
-            if (e.isTrigger || _converted.indexOf(originalEvent) >= 0) {
+            if (e.isTrigger || _indexOf(_converted, originalEvent) >= 0) {
                 return;
             }
 
