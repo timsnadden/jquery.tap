@@ -28,7 +28,7 @@
  * click will automatically be used instead.
  *
  * @author Aaron Gloege
- * @version 1.0
+ * @version 1.0.1
  */
 (function(document, $) {
     'use strict';
