@@ -186,7 +186,8 @@
      * @private
      */
     var _isTap = function(e) {
-        var touch = e.changedTouches[0];
+        var originalEvent = e.originalEvent;
+        var touch = e.changedTouches ? e.changedTouches[0] : originalEvent.changedTouches[0];
         var xDelta = Math.abs(touch.pageX - TOUCH_VALUES.x);
         var yDelta = Math.abs(touch.pageY - TOUCH_VALUES.y);
         var delta = Math.max(xDelta, yDelta);
