@@ -27,7 +27,7 @@
             ZIP: 'https://github.com/aarongloege/jquery.tap/archive/' + VERSION_ID + '.zip',
             TAR: 'https://github.com/aarongloege/jquery.tap/archive/' + VERSION_ID + '.tar.gz'
         },
-        SCRIPT: 'https://raw.github.com/aarongloege/jquery.tap/' + VERSION_ID + '/jquery.tap.js',
+        SCRIPT: '../jquery.tap.js',
         LOCAL: '../jquery.tap.js'
     };
 

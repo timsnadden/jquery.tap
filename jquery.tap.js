@@ -1,3 +1,35 @@
+/**
+ * @fileOverview
+ * Copyright (c) 2013 Aaron Gloege
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * jQuery Tap Plugin
+ * Using the tap event, this plugin will properly simulate a click event
+ * in touch browsers using touch events, and on non-touch browsers,
+ * click will automatically be used instead.
+ *
+ * @author Aaron Gloege
+ * @version 1.0.2
+ */
 (function(document, $) {
     'use strict';
 
@@ -26,12 +58,47 @@
     var EVENT_NAME = 'tap';
 
     /**
+     * Max distance between touchstart and touchend to be considered a tap
+     *
+     * @type {number}
+     * @constant
+     */
+    var MAX_TAP_DELTA = 40;
+
+    /**
+     * Max duration between touchstart and touchend to be considered a tap
+     *
+     * @type {number}
+     * @constant
+     */
+    var MAX_TAP_TIME = 400;
+
+    /**
      * Event variables to copy to touches
      *
      * @type {Array}
      * @constant
      */
     var EVENT_VARIABLES = 'clientX clientY screenX screenY pageX pageY'.split(' ');
+
+    /**
+     * Fetch index of value from array
+     *
+     * @param {Array} array
+     * @param {*} value
+     * @returns {number}
+     * @private
+     */
+    var _indexOf = function(array, value) {
+        var index;
+        if (Array.prototype.indexOf) {
+            index = array.indexOf(value);
+        } else {
+            index = $.inArray(value, array);
+        }
+
+        return index;
+    };
 
     /**
      * Object for tracking current touch settings (x, y, target, canceled, etc)
@@ -74,7 +141,14 @@
          *
          * @type {boolean}
          */
-        cancel: false
+        cancel: false,
+
+        /**
+         * Start time
+         *
+         * @type {number}
+         */
+        start: 0
 
     };
 
@@ -102,6 +176,29 @@
         }
 
         return event;
+    };
+
+    /**
+     * Determine if a valid tap event
+     *
+     * @param {jQuery.Event} e
+     * @returns {boolean}
+     * @private
+     */
+    var _isTap = function(e) {
+        var originalEvent = e.originalEvent;
+        var touch = e.changedTouches ? e.changedTouches[0] : originalEvent.changedTouches[0];
+        var xDelta = Math.abs(touch.pageX - TOUCH_VALUES.x);
+        var yDelta = Math.abs(touch.pageY - TOUCH_VALUES.y);
+        var delta = Math.max(xDelta, yDelta);
+
+        return (
+            Date.now() - TOUCH_VALUES.start < MAX_TAP_TIME &&
+            delta < MAX_TAP_DELTA &&
+            !TOUCH_VALUES.cancel &&
+            TOUCH_VALUES.count === 1 &&
+            Tap.isTracking
+        );
     };
 
     /**
@@ -183,6 +280,7 @@
             var touch = touches[0];
 
             TOUCH_VALUES.cancel = false;
+            TOUCH_VALUES.start = Date.now();
             TOUCH_VALUES.$el = $(e.target);
             TOUCH_VALUES.x = touch.pageX;
             TOUCH_VALUES.y = touch.pageY;
@@ -195,11 +293,7 @@
          * @param {jQuery.Event} e
          */
         onTouchEnd: function(e) {
-            if (
-                !TOUCH_VALUES.cancel &&
-                TOUCH_VALUES.count === 1 &&
-                Tap.isTracking
-            ) {
+            if (_isTap(e)) {
                 TOUCH_VALUES.$el.trigger(_createEvent(EVENT_NAME, e));
             }
             // Cancel tap
@@ -245,7 +339,7 @@
          */
         var _onClick = function(e) {
             var originalEvent = e.originalEvent;
-            if (e.isTrigger || _converted.indexOf(originalEvent) >= 0) {
+            if (e.isTrigger || _indexOf(_converted, originalEvent) >= 0) {
                 return;
             }
 
