@@ -1,1 +1,1 @@
-uglifyjs2 jquery.tap.js -o jquery.tap.min.js -c -m sort=true -v --stats;
+uglifyjs jquery.tap.js -o jquery.tap.min.js -c -m sort=true -v --stats;
