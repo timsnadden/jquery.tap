@@ -166,10 +166,10 @@
 
         return (
             e.timeStamp - startEvent.timeStamp < MAX_TAP_TIME &&
-                delta < MAX_TAP_DELTA &&
-                (!startEvent.touches || TOUCH_VALUES.count === 1) &&
-                Tap.isTracking
-            );
+            delta < MAX_TAP_DELTA &&
+            (!startEvent.touches || TOUCH_VALUES.count === 1) &&
+            Tap.isTracking
+        );
     };
 
     /**
@@ -335,11 +335,11 @@
         onClick: function(e) {
             if (
                 !e.isTrigger &&
-                    _lastCanceledTap.target === e.target &&
-                    _lastCanceledTap.pageX === e.pageX &&
-                    _lastCanceledTap.pageY === e.pageY &&
-                    e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
-                ) {
+                _lastCanceledTap.target === e.target &&
+                _lastCanceledTap.pageX === e.pageX &&
+                _lastCanceledTap.pageY === e.pageY &&
+                e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
+            ) {
                 return false;
             }
         }
