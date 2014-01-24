@@ -151,7 +151,7 @@
     var _createEvent = function(type, e) {
         var originalEvent = e.originalEvent;
         var event = $.Event(originalEvent);
-        var touch = originalEvent.changedTouches ? originalEvent.changedTouches[0] : originalEvent;
+        var touch = originalEvent.changedTouches ? originalEvent.changedTouches[0] : e;
 
         event.type = type;
 
