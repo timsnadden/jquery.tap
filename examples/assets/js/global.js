@@ -5,10 +5,16 @@
 
         var $touchInner = $('.touch-inner');
 
-        $('.touch-area').on('tap', function(e) {
-            console.log('tap event', e);
-            $touchInner.prepend("Tap {\n    x: " + e.pageX + ",\n    y: " + e.pageY + "\n    e: " + e.originalEvent.type + "\n};\n");
-        });
+        $('.touch-area')
+            .on('tap', function(e) {
+                console.log('tap event', e);
+                var type = e.originalEvent.type.indexOf('touch') === 0 ? 'touch' : 'mouse';
+
+                $touchInner.prepend("Tap {\n    x: " + e.pageX + ",\n    y: " + e.pageY + "\n    e: " + type + "\n};\n");
+            })
+            .on('tap', 'a', function(e) {
+                e.preventDefault();
+            });
 
     });
 

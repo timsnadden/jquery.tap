@@ -7,13 +7,15 @@
 
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-    <script src="../jquery.tap.js"></script>
+    <script src="../jquery.tap.min.js"></script>
 
     <!-- Global -->
     <script src="assets/js/global.js"></script>
 </head>
 <body>
-    <div class="touch-area"></div>
+    <div class="touch-area">
+        <p>Calling preventDefault() with the tap event with also prevent the default behavior for the click event that usually occurs after the tap event. This is useful for <a href="http://www.google.com">links</a>.</p>
+    </div>
     <div class="touch-results">
         <div class="touch-inner"></div>
     </div>

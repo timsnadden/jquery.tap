@@ -43,6 +43,12 @@ If the browser does not support touch events, then the regular mouse events to c
 
 Gotcha covered. jQuery.tap listens for both touch and mouse events and will use the first event that is fired to detect a tap.
 
+## Caveats
+
+### Click events
+
+There is currently not a way to stop the `click` event from triggering after `touchstart`/`touchend` and `mousedown`/`mousedown` if the `tap` event is canceled (with `preventDefault()`). The `click` event will still fire, be `preventDefault` will be called on that `click` event if `preventDefault` was called on the tap event.
+
 ## Licence
 
 jQuery.tap is licensed under the [MIT license](http://opensource.org/licenses/mit-license.html).

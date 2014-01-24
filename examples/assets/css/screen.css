@@ -22,6 +22,10 @@ body {
     height: 100%;
 }
 
+.touch-area p {
+    padding: 20px;
+}
+
 .touch-results {
     position: absolute;
     top: 0;
