@@ -355,14 +355,17 @@
                     this.touch = $.support.touch = false;
                     $touchA
                         .on('tap', spy)
-                        .simulate('click');
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(1);
                 });
 
                 it('will trigger tap event on parent element when triggered on child bound to parent', function() {
                     $body.on('tap', spy);
-                    $touchA.simulate('click');
+                    $touchA
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(1);
                 });
@@ -370,7 +373,9 @@
                 it('will bubble tap event after click event', function() {
                     $body.on('tap', spy);
                     $touchA.on('tap', spy);
-                    $touchB.simulate('click');
+                    $touchB
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(2);
                 });
@@ -380,14 +385,18 @@
 
                 it('will trigger tap event on click', function() {
                     $body.on('tap', touchA, spy);
-                    $touchA.simulate('click');
+                    $touchA
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(1);
                 });
 
                 it('will trigger tap event on parent element when triggered on child and bound to parent', function() {
                     $body.on('tap', touchA, spy);
-                    $touchB.simulate('click');
+                    $touchB
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(1);
                 });
@@ -397,7 +406,9 @@
                     $touchA
                         .on('tap', touchB, spy)
                         .on('tap', spy);
-                    $touchB.simulate('click');
+                    $touchB
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(3);
                 });
@@ -407,7 +418,8 @@
                     $touchA
                         .on('tap', touchB, spy)
                         .on('tap', spy)
-                        .simulate('click');
+                        .simulate('mousedown')
+                        .simulate('mouseup');
 
                     expect(spy.callCount).to.be(1);
                 });
