@@ -36,74 +36,55 @@
     /**
      * Flag to determine if touch is supported
      *
-     * @type {boolean}
-     * @constant
+     * @type Boolean
+     * @final
      */
     var TOUCH = $.support.touch = !!(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch);
 
     /**
      * Event namespace
      *
-     * @type {string}
-     * @constant
+     * @type String
+     * @final
      */
     var HELPER_NAMESPACE = '._tap';
 
     /**
      * Event name
      *
-     * @type {string}
-     * @constant
+     * @type String
+     * @final
      */
     var EVENT_NAME = 'tap';
 
     /**
      * Max distance between touchstart and touchend to be considered a tap
      *
-     * @type {number}
-     * @constant
+     * @type Number
+     * @final
      */
     var MAX_TAP_DELTA = 40;
 
     /**
      * Max duration between touchstart and touchend to be considered a tap
      *
-     * @type {number}
-     * @constant
+     * @type Number
+     * @final
      */
     var MAX_TAP_TIME = 400;
 
     /**
      * Event variables to copy to touches
      *
-     * @type {Array}
-     * @constant
+     * @type String[]
+     * @final
      */
     var EVENT_VARIABLES = 'clientX clientY screenX screenY pageX pageY'.split(' ');
 
     /**
-     * Fetch index of value from array
-     *
-     * @param {Array} array
-     * @param {*} value
-     * @returns {number}
-     * @private
-     */
-    var _indexOf = function(array, value) {
-        var index;
-        if (Array.prototype.indexOf) {
-            index = array.indexOf(value);
-        } else {
-            index = $.inArray(value, array);
-        }
-
-        return index;
-    };
-
-    /**
      * Object for tracking current touch settings (x, y, target, canceled, etc)
      *
-     * @type {object}
+     * @type Object
      * @static
      */
     var TOUCH_VALUES = {
@@ -111,42 +92,48 @@
         /**
          * target element of touchstart event
          *
-         * @type {jQuery}
+         * @property $el
+         * @type jQuery
          */
         $el: null,
 
         /**
          * pageX position of touch on touchstart
          *
-         * @type {number}
+         * @property x
+         * @type Number
          */
         x: 0,
 
         /**
          * pageY position of touch on touchstart
          *
-         * @type {number}
+         * @property y
+         * @type Number
          */
         y: 0,
 
         /**
          * Number of touches currently active on touchstart
          *
-         * @type {number}
+         * @property count
+         * @type Number
          */
         count: 0,
 
         /**
          * Has the current tap event been canceled?
          *
-         * @type {boolean}
+         * @property cancel
+         * @type Boolean
          */
         cancel: false,
 
         /**
          * Start time
          *
-         * @type {number}
+         * @property start
+         * @type Number
          */
         start: 0
 
@@ -156,7 +143,7 @@
      * Create a new event from the original event
      * Copy over EVENT_VARIABLES from the first changedTouches
      *
-     * @param {string} type
+     * @param {String} type
      * @param {jQuery.Event} e
      * @return {jQuery.Event}
      * @private
@@ -182,10 +169,14 @@
      * Determine if a valid tap event
      *
      * @param {jQuery.Event} e
-     * @returns {boolean}
+     * @return {Boolean}
      * @private
      */
     var _isTap = function(e) {
+        if (e.isTrigger) {
+            return false;
+        }
+        
         var originalEvent = e.originalEvent;
         var touch = e.changedTouches ? e.changedTouches[0] : originalEvent.changedTouches[0];
         var xDelta = Math.abs(touch.pageX - TOUCH_VALUES.x);
@@ -193,7 +184,7 @@
         var delta = Math.max(xDelta, yDelta);
 
         return (
-            Date.now() - TOUCH_VALUES.start < MAX_TAP_TIME &&
+            e.timeStamp - TOUCH_VALUES.start < MAX_TAP_TIME &&
             delta < MAX_TAP_DELTA &&
             !TOUCH_VALUES.cancel &&
             TOUCH_VALUES.count === 1 &&
@@ -205,67 +196,77 @@
      * Tap object that will track touch events and
      * trigger the tap event when necessary
      *
-     * @name Tap
-     * @type {object}
+     * @class Tap
+     * @static
      */
     var Tap = {
 
         /**
          * Flag to determine if touch events are currently enabled
          *
-         * @type {boolean}
+         * @property isEnabled
+         * @type Boolean
          */
         isEnabled: false,
 
         /**
          * Are we currently tracking a tap event?
          *
-         * @type {boolean}
+         * @property isTracking
+         * @type Boolean
          */
         isTracking: false,
 
         /**
          * Enable touch event listeners
          *
-         * @return {Tap}
+         * @method enable
          */
         enable: function() {
-            if (this.isEnabled) {
-                return this;
+            if (Tap.isEnabled) {
+                return;
             }
 
-            this.isEnabled = true;
+            Tap.isEnabled = true;
 
-            $(document.body)
-                .on('touchstart' + HELPER_NAMESPACE, this.onTouchStart)
-                .on('touchend' + HELPER_NAMESPACE, this.onTouchEnd)
-                .on('touchcancel' + HELPER_NAMESPACE, this.onTouchCancel);
-
-            return this;
+            if (TOUCH) {
+                $(document.body)
+                    .on('touchstart' + HELPER_NAMESPACE, Tap.onTouchStart)
+                    .on('touchend' + HELPER_NAMESPACE, Tap.onTouchEnd)
+                    .on('touchcancel' + HELPER_NAMESPACE, Tap.onTouchCancel);
+            } else {
+                $(document.body)
+                    .on('click' + HELPER_NAMESPACE, Tap.onClick);
+            }
         },
 
         /**
          * Disable touch event listeners
          *
-         * @return {boolean}
+         * @method disable
          */
         disable: function() {
-            if (!this.isEnabled) {
-                return this;
+            if (!Tap.isEnabled) {
+                return;
             }
 
-            this.isEnabled = false;
+            Tap.isEnabled = false;
 
-            $(document.body)
-                .off('touchstart' + HELPER_NAMESPACE, this.onTouchStart)
-                .off('touchend' + HELPER_NAMESPACE, this.onTouchEnd)
-                .off('touchcancel' + HELPER_NAMESPACE, this.onTouchCancel);
-
-            return this;
+            if (TOUCH) {
+                $(document.body)
+                    .off('touchstart' + HELPER_NAMESPACE, Tap.onTouchStart)
+                    .off('touchend' + HELPER_NAMESPACE, Tap.onTouchEnd)
+                    .off('touchcancel' + HELPER_NAMESPACE, Tap.onTouchCancel);
+            } else {
+                $(document.body)
+                    .off('click' + HELPER_NAMESPACE, Tap.onClick);
+            }
         },
 
         /**
          * Store touch start values and target
+         *
+         * @method onTouchStart
          * @param {jQuery.Event} e
          */
         onTouchStart: function(e) {
@@ -280,7 +281,7 @@
             var touch = touches[0];
 
             TOUCH_VALUES.cancel = false;
-            TOUCH_VALUES.start = Date.now();
+            TOUCH_VALUES.start = e.timeStamp;
             TOUCH_VALUES.$el = $(e.target);
             TOUCH_VALUES.x = touch.pageX;
             TOUCH_VALUES.y = touch.pageY;
@@ -290,6 +291,7 @@
          * If touch has not been canceled, create a
          * tap event and trigger it on the target element
          *
+         * @method onTouchEnd
          * @param {jQuery.Event} e
          */
         onTouchEnd: function(e) {
@@ -303,11 +305,26 @@
         /**
          * Cancel tap by setting TOUCH_VALUES.cancel to true
          *
+         * @method onTouchCancel
          * @param {jQuery.Event} e
          */
         onTouchCancel: function(e) {
             Tap.isTracking = false;
             TOUCH_VALUES.cancel = true;
+        },
+
+        /**
+         * Convert click event to tap
+         *
+         * @method onClick
+         * @param {jQuery.Event} e
+         */
+        onClick: function(e) {
+            if (e.isTrigger) {
+                return;
+            }
+
+            $(e.target).trigger(_createEvent(EVENT_NAME, e));
         }
 
     };
@@ -315,59 +332,7 @@
     // Setup special event and enable
     // tap only if a tap event is bound
     $.event.special[EVENT_NAME] = {
-        setup: function() {
-            Tap.enable();
-        }
+        setup: Tap.enable
     };
-
-    // If we are not in a touch compatible browser, map tap event to the click event
-    if (!TOUCH) {
-
-        /**
-         * Click event ID's that have already been converted to a tap
-         *
-         * @type {object}
-         * @private
-         */
-        var _converted = [];
-
-        /**
-         * Convert click events into tap events
-         *
-         * @param {jQuery.Event} e
-         * @private
-         */
-        var _onClick = function(e) {
-            var originalEvent = e.originalEvent;
-            if (e.isTrigger || _indexOf(_converted, originalEvent) >= 0) {
-                return;
-            }
-
-            // limit size of _converted array
-            if (_converted.length > 3) {
-                _converted.splice(0, _converted.length - 3);
-            }
-
-            _converted.push(originalEvent);
-
-            var event = _createEvent(EVENT_NAME, e);
-            $(e.target).trigger(event);
-        };
-
-        // Bind click events that will be converted to a tap event
-        //
-        // Would have liked to use the bindType and delegateType properties
-        // to map the tap event to click events, but this does not allow us to prevent the
-        // tap event from triggering when a click event is manually triggered via .trigger().
-        // Tap should only trigger if the user physically clicks.
-        $.event.special[EVENT_NAME] = {
-            setup: function() {
-                $(this).on('click' + HELPER_NAMESPACE, _onClick);
-            },
-            teardown: function() {
-                $(this).off('click' + HELPER_NAMESPACE, _onClick);
-            }
-        };
-    }
 
 }(document, jQuery));
