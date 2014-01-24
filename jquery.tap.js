@@ -97,36 +97,12 @@
     var _lastCanceledTap = $.Event();
 
     /**
-     * Object for tracking current touch settings (x, y, target, canceled, etc)
+     * Object for tracking current touch
      *
      * @type Object
      * @static
      */
     var TOUCH_VALUES = {
-
-        /**
-         * target element of touchstart event
-         *
-         * @property $el
-         * @type jQuery
-         */
-        $el: null,
-
-        /**
-         * pageX position of touch on touchstart
-         *
-         * @property x
-         * @type Number
-         */
-        x: 0,
-
-        /**
-         * pageY position of touch on touchstart
-         *
-         * @property y
-         * @type Number
-         */
-        y: 0,
 
         /**
          * Number of touches currently active on touchstart
@@ -137,12 +113,12 @@
         count: 0,
 
         /**
-         * Start time
+         * touchstart/mousedown jQuery.Event object
          *
-         * @property start
-         * @type Number
+         * @property event
+         * @type jQuery.Event
          */
-        start: 0
+        event: 0
 
     };
 
@@ -182,15 +158,16 @@
         if (e.isTrigger) {
             return false;
         }
-        
-        var xDelta = Math.abs(e.pageX - TOUCH_VALUES.x);
-        var yDelta = Math.abs(e.pageY - TOUCH_VALUES.y);
+
+        var startEvent = TOUCH_VALUES.event;
+        var xDelta = Math.abs(e.pageX - startEvent.pageX);
+        var yDelta = Math.abs(e.pageY - startEvent.pageY);
         var delta = Math.max(xDelta, yDelta);
 
         return (
-            e.timeStamp - TOUCH_VALUES.start < MAX_TAP_TIME &&
+            e.timeStamp - startEvent.timeStamp < MAX_TAP_TIME &&
             delta < MAX_TAP_DELTA &&
-            TOUCH_VALUES.count === 1 &&
+            (!startEvent.touches || TOUCH_VALUES.count === 1) &&
             Tap.isTracking
         );
     };
@@ -206,12 +183,13 @@
             var touch = event.originalEvent.changedTouches[0];
 
             event.touches = event.originalEvent.changedTouches;
-            event.pageX = touch.pageX;
-            event.pageY = touch.pageY;
-            event.screenX = touch.screenX;
-            event.screenY = touch.screenY;
-            event.clientX = touch.clientX;
-            event.clientY = touch.clientY;
+
+            var i = 0;
+            var length = EVENT_VARIABLES.length;
+
+            for (; i < length; i++) {
+                event[EVENT_VARIABLES[i]] = touch[EVENT_VARIABLES[i]];
+            }
         }
     };
 
@@ -298,11 +276,7 @@
 
             Tap.isTracking = true;
 
-            TOUCH_VALUES.count = e.touches ? e.touches.length : 1;
-            TOUCH_VALUES.start = e.timeStamp;
-            TOUCH_VALUES.$el = $(e.target);
-            TOUCH_VALUES.x = e.pageX;
-            TOUCH_VALUES.y = e.pageY;
+            TOUCH_VALUES.event = e;
 
             if (e.touches) {
                 $BODY
@@ -327,7 +301,7 @@
 
             if (_isTap(e)) {
                 event = _createEvent(EVENT_NAME, e);
-                TOUCH_VALUES.$el.trigger(event);
+                $(TOUCH_VALUES.event.target).trigger(event);
             }
 
             // Cancel tap tracking
@@ -340,7 +314,7 @@
         },
 
         /**
-         * Cancel tap by setting TOUCH_VALUES.cancel to true
+         * Cancel tap and remove event listeners for active tap tracking
          *
          * @method onTouchCancel
          * @param {jQuery.Event} e
@@ -360,6 +334,8 @@
          */
         onClick: function(e) {
             if (
+                !e.isTrigger &&
+                _lastCanceledTap.target === e.target &&
                 _lastCanceledTap.pageX === e.pageX &&
                 _lastCanceledTap.pageY === e.pageY &&
                 e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
@@ -377,4 +353,3 @@
     };
 
 }(document, jQuery));
-
