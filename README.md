@@ -47,7 +47,7 @@ Gotcha covered. jQuery.tap listens for both touch and mouse events and will use 
 
 ### Click events
 
-There is currently not a way to stop the `click` event from triggering after `touchstart`/`touchend` and `mousedown`/`mousedown` if the `tap` event is canceled (with `preventDefault()`). The `click` event will still fire, be `preventDefault` will be called on that `click` event if `preventDefault` was called on the tap event.
+There is currently not a way to stop the `click` event from triggering after `touchstart`/`touchend` and `mousedown`/`mouseup` events if the `tap` event is canceled with `preventDefault()`. The `click` event will still fire, be `preventDefault` will be called on that `click` event if `preventDefault` was called on the tap event.
 
 ## Licence
 
