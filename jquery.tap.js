@@ -34,12 +34,12 @@
     'use strict';
 
     /**
-     * Flag to determine if touch is supported
+     * Event namespace
      *
-     * @type Boolean
+     * @type String
      * @final
      */
-    var TOUCH = $.support.touch = !!(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch);
+    var HELPER_NAMESPACE = '._tap';
 
     /**
      * Event namespace
@@ -47,7 +47,7 @@
      * @type String
      * @final
      */
-    var HELPER_NAMESPACE = '._tap';
+    var HELPER_ACTIVE_NAMESPACE = '._tapActive';
 
     /**
      * Event name
@@ -80,6 +80,21 @@
      * @final
      */
     var EVENT_VARIABLES = 'clientX clientY screenX screenY pageX pageY'.split(' ');
+
+    /**
+     * jQuery body object
+     *
+     * @type jQuery
+     */
+    var $BODY;
+
+    /**
+     * Last canceled tap event
+     *
+     * @type jQuery.Event
+     * @private
+     */
+    var _lastCanceledTap = $.Event();
 
     /**
      * Object for tracking current touch settings (x, y, target, canceled, etc)
@@ -122,14 +137,6 @@
         count: 0,
 
         /**
-         * Has the current tap event been canceled?
-         *
-         * @property cancel
-         * @type Boolean
-         */
-        cancel: false,
-
-        /**
          * Start time
          *
          * @property start
@@ -141,7 +148,7 @@
 
     /**
      * Create a new event from the original event
-     * Copy over EVENT_VARIABLES from the first changedTouches
+     * Copy over EVENT_VARIABLES from the original jQuery.Event
      *
      * @param {String} type
      * @param {jQuery.Event} e
@@ -151,7 +158,6 @@
     var _createEvent = function(type, e) {
         var originalEvent = e.originalEvent;
         var event = $.Event(originalEvent);
-        var touch = originalEvent.changedTouches ? originalEvent.changedTouches[0] : e;
 
         event.type = type;
 
@@ -159,7 +165,7 @@
         var length = EVENT_VARIABLES.length;
 
         for (; i < length; i++) {
-            event[EVENT_VARIABLES[i]] = touch[EVENT_VARIABLES[i]];
+            event[EVENT_VARIABLES[i]] = e[EVENT_VARIABLES[i]];
         }
 
         return event;
@@ -177,19 +183,36 @@
             return false;
         }
         
-        var originalEvent = e.originalEvent;
-        var touch = e.changedTouches ? e.changedTouches[0] : originalEvent.changedTouches[0];
-        var xDelta = Math.abs(touch.pageX - TOUCH_VALUES.x);
-        var yDelta = Math.abs(touch.pageY - TOUCH_VALUES.y);
+        var xDelta = Math.abs(e.pageX - TOUCH_VALUES.x);
+        var yDelta = Math.abs(e.pageY - TOUCH_VALUES.y);
         var delta = Math.max(xDelta, yDelta);
 
         return (
             e.timeStamp - TOUCH_VALUES.start < MAX_TAP_TIME &&
             delta < MAX_TAP_DELTA &&
-            !TOUCH_VALUES.cancel &&
             TOUCH_VALUES.count === 1 &&
             Tap.isTracking
         );
+    };
+
+    /**
+     * Normalize touch events with data from first touch in the jQuery.Event
+     *
+     * @param {jQuery.Event} event
+     * @private
+     */
+    var _normalizeEvent = function(event) {
+        if (event.type.indexOf('touch') === 0) {
+            var touch = event.originalEvent.changedTouches[0];
+
+            event.touches = event.originalEvent.changedTouches;
+            event.pageX = touch.pageX;
+            event.pageY = touch.pageY;
+            event.screenX = touch.screenX;
+            event.screenY = touch.screenY;
+            event.clientX = touch.clientX;
+            event.clientY = touch.clientY;
+        }
     };
 
     /**
@@ -229,15 +252,11 @@
 
             Tap.isEnabled = true;
 
-            if (TOUCH) {
-                $(document.body)
-                    .on('touchstart' + HELPER_NAMESPACE, Tap.onTouchStart)
-                    .on('touchend' + HELPER_NAMESPACE, Tap.onTouchEnd)
-                    .on('touchcancel' + HELPER_NAMESPACE, Tap.onTouchCancel);
-            } else {
-                $(document.body)
-                    .on('click' + HELPER_NAMESPACE, Tap.onClick);
-            }
+            // Set body element
+            $BODY = $(document.body)
+                .on('touchstart' + HELPER_NAMESPACE, Tap.onStart)
+                .on('mousedown' + HELPER_NAMESPACE, Tap.onStart)
+                .on('click' + HELPER_NAMESPACE, Tap.onClick);
         },
 
         /**
@@ -252,15 +271,8 @@
 
             Tap.isEnabled = false;
 
-            if (TOUCH) {
-                $(document.body)
-                    .off('touchstart' + HELPER_NAMESPACE, Tap.onTouchStart)
-                    .off('touchend' + HELPER_NAMESPACE, Tap.onTouchEnd)
-                    .off('touchcancel' + HELPER_NAMESPACE, Tap.onTouchCancel);
-            } else {
-                $(document.body)
-                    .off('click' + HELPER_NAMESPACE, Tap.onClick);
-            }
+            // unbind all events with namespace
+            $BODY.off(HELPER_NAMESPACE);
         },
 
         /**
@@ -269,22 +281,36 @@
          * @method onTouchStart
          * @param {jQuery.Event} e
          */
-        onTouchStart: function(e) {
-            var touches = e.originalEvent.touches;
-            TOUCH_VALUES.count = touches.length;
+        onStart: function(e) {
+            if (e.isTrigger) {
+                return;
+            }
+
+            _normalizeEvent(e);
+
+            if (e.touches) {
+                TOUCH_VALUES.count = e.touches.length;
+            }
 
             if (Tap.isTracking) {
                 return;
             }
 
             Tap.isTracking = true;
-            var touch = touches[0];
 
-            TOUCH_VALUES.cancel = false;
+            TOUCH_VALUES.count = e.touches ? e.touches.length : 1;
             TOUCH_VALUES.start = e.timeStamp;
             TOUCH_VALUES.$el = $(e.target);
-            TOUCH_VALUES.x = touch.pageX;
-            TOUCH_VALUES.y = touch.pageY;
+            TOUCH_VALUES.x = e.pageX;
+            TOUCH_VALUES.y = e.pageY;
+
+            if (e.touches) {
+                $BODY
+                    .on('touchend' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onEnd)
+                    .on('touchcancel' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onCancel);
+            } else {
+                $BODY.on('mouseup' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onEnd);
+            }
         },
 
         /**
@@ -294,12 +320,23 @@
          * @method onTouchEnd
          * @param {jQuery.Event} e
          */
-        onTouchEnd: function(e) {
+        onEnd: function(e) {
+            var event;
+
+            _normalizeEvent(e);
+
             if (_isTap(e)) {
-                TOUCH_VALUES.$el.trigger(_createEvent(EVENT_NAME, e));
+                event = _createEvent(EVENT_NAME, e);
+                TOUCH_VALUES.$el.trigger(event);
             }
-            // Cancel tap
-            Tap.onTouchCancel(e);
+
+            // Cancel tap tracking
+            Tap.onCancel(e);
+
+            // prevent `click` event from firing if tap event was canceled (using `preventDefault()`)
+            if (event && event.isDefaultPrevented()) {
+                _lastCanceledTap = event;
+            }
         },
 
         /**
@@ -308,23 +345,27 @@
          * @method onTouchCancel
          * @param {jQuery.Event} e
          */
-        onTouchCancel: function(e) {
+        onCancel: function(e) {
             Tap.isTracking = false;
-            TOUCH_VALUES.cancel = true;
+
+            $BODY.off(HELPER_ACTIVE_NAMESPACE);
         },
 
         /**
-         * Convert click event to tap
+         * If tap was canceled, cancel click event
          *
          * @method onClick
          * @param {jQuery.Event} e
+         * @return {void|Boolean}
          */
         onClick: function(e) {
-            if (e.isTrigger) {
-                return;
+            if (
+                _lastCanceledTap.pageX === e.pageX &&
+                _lastCanceledTap.pageY === e.pageY &&
+                e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
+            ) {
+                return false;
             }
-
-            $(e.target).trigger(_createEvent(EVENT_NAME, e));
         }
 
     };
@@ -336,3 +377,4 @@
     };
 
 }(document, jQuery));
+

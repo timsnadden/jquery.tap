@@ -7,7 +7,7 @@
 
         $('.touch-area').on('tap', function(e) {
             console.log('tap event', e);
-            $touchInner.prepend("Tap {\n    x: " + e.pageX + ",\n    y: " + e.pageY + "\n};\n");
+            $touchInner.prepend("Tap {\n    x: " + e.pageX + ",\n    y: " + e.pageY + "\n    e: " + e.originalEvent.type + "\n};\n");
         });
 
     });
