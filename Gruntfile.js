@@ -33,6 +33,7 @@ module.exports = function(grunt) {
         'gh-pages': {
             options: {
                 add: true,
+                clone: './.grunt',
                 branch: 'gh-pages',
                 base: './'
             },
@@ -53,5 +54,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['build']);
     grunt.registerTask('build', ['uglify']);
-    grunt.registerTask('gh', ['gh-pages', 'clean:gh-pages']);
+    grunt.registerTask('gh', ['clean:gh-pages', 'gh-pages', 'clean:gh-pages']);
 };
