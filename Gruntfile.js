@@ -28,6 +28,17 @@ module.exports = function(grunt) {
                     './jquery.tap.min.js': ['./jquery.tap.js']
                 }
             }
+        },
+
+        'gh-pages': {
+            options: {
+                add: true,
+                branch: 'gh-pages',
+                base: './'
+            },
+            'gh-pages': {
+                src: ['jquery.tap.js', 'jquery.tap.min.js', '.gitignore']
+            }
         }
 
     });
