@@ -5,7 +5,7 @@ A jQuery plugin that creates a click alternative for touch enabled browsers.
 
 ## Why?
 
-Click events on touch devices do not work the best. There is a 300ms delay from when you release your finger to the time the click event is triggered. This behavior is not desired.
+Click events on touch devices do not work the best. There is a ~300ms delay from when you release your finger to the time the click event is triggered. This behavior is not desired. :(
 
 ## How do I use it?
 
@@ -37,7 +37,11 @@ The tap event will also bubble.
 
 ## What About Desktop?
 
-If the browser does not support touch events, then the regular click event will be used. No need for if/else statements, jQuery.tap will do that for you.
+If the browser does not support touch events, then the regular mouse events to create a tap event. No need for if/else statements, jQuery.tap will do that for you.
+
+## Now What About Browsers That Support Both Touch and Mouse?
+
+Gotcha covered. jQuery.tap listens for both touch and mouse events and will use the first event that is fired to detect a tap.
 
 ## Licence
 
