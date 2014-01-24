@@ -37,7 +37,13 @@ module.exports = function(grunt) {
                 base: './'
             },
             'gh-pages': {
-                src: ['jquery.tap.js', 'jquery.tap.min.js', '.gitignore']
+                src: ['jquery.tap.js', 'jquery.tap.min.js', '.gitignore', 'Gruntfile.js', 'package.json']
+            }
+        },
+
+        clean: {
+            'gh-pages': {
+                src: ['./.grunt']
             }
         }
 
@@ -47,4 +53,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['build']);
     grunt.registerTask('build', ['uglify']);
+    grunt.registerTask('gh', ['clean:gh-pages', 'gh-pages', 'clean:gh-pages']);
 };
