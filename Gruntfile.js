@@ -33,6 +33,7 @@ module.exports = function(grunt) {
         'gh-pages': {
             options: {
                 add: true,
+                clone: './.grunt',
                 branch: 'gh-pages',
                 base: './'
             },
