@@ -7,7 +7,7 @@
      * @type {String}
      * @constant
      */
-    var VERSION_ID = "1.0.2";
+    var VERSION_ID = "1.1";
 
     /**
      * User local copy of tap?
@@ -15,7 +15,7 @@
      * @type {boolean}
      * @constant
      */
-    var LOCAL = false;
+    var LOCAL = true;
 
     /**
      * URLs
