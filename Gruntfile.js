@@ -17,6 +17,12 @@ module.exports = function(grunt) {
                     './Gruntfile.js'
                 ],
                 tasks: ['build']
+            },
+            markdown: {
+                files: [
+                    './README.md'
+                ],
+                task: ['markdown']
             }
         },
 
@@ -38,13 +44,43 @@ module.exports = function(grunt) {
                 base: './'
             },
             'gh-pages': {
-                src: ['jquery.tap.js', 'jquery.tap.min.js', '.gitignore', 'Gruntfile.js', 'package.json']
+                src: [
+                    'jquery.tap.js',
+                    '.gitignore',
+                    'README.md',
+                    'index.html'
+                ]
             }
         },
 
         clean: {
             'gh-pages': {
                 src: ['./.grunt']
+            },
+            markdown: {
+                src: './index.html'
+            }
+        },
+
+        markdown: {
+            'gh-pages': {
+                files: [
+                    {
+                        src: './README.md',
+                        dest: './index.html'
+                    }
+                ],
+                options: {
+                    template: './markdown.template',
+                    markdownOptions: {
+                        highlight: 'manual',
+                        gfm: true,
+                        codeLines: {
+                            before: '<div class="highlight">',
+                            after: '</div>'
+                        }
+                    }
+                }
             }
         }
 
@@ -54,5 +90,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['build']);
     grunt.registerTask('build', ['uglify']);
-    grunt.registerTask('gh', ['clean:gh-pages', 'gh-pages', 'clean:gh-pages']);
+    grunt.registerTask('gh', ['markdown:gh-pages', 'clean:gh-pages', 'gh-pages', 'clean:gh-pages', 'clean:markdown']);
 };
