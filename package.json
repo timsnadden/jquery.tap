@@ -13,6 +13,7 @@
         "grunt-gh-pages": "0.9.0",
         "grunt-contrib-clean": "0.5.0",
         "grunt-markdown": "0.5.0",
-        "grunt-git": "0.2.4"
+        "grunt-git": "0.2.4",
+        "grunt-modify-json": "0.1.1"
     }
 }

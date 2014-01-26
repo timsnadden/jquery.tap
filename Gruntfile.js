@@ -118,24 +118,21 @@ module.exports = function(grunt) {
         },
 
         // Update json files with the tag
-        'update-json': {
-            'plugin': {
-                file: 'tap.jquery.json',
+        modify_json: {
+            options: {
                 fields: {
                     version: tag
                 }
             },
-            'package': {
-                file:  'package.json',
-                fields: {
-                    version: tag
-                }
+            plugin: {
+                src: 'tap.jquery.json'
+            },
+            package: {
+                src:  'package.json'
             }
         }
 
     });
-
-    grunt.loadTasks('tasks');
 
     // -- Tasks ----------------------------------------------------------------
 
@@ -144,6 +141,6 @@ module.exports = function(grunt) {
     grunt.registerTask('cleanup', ['clean:markdown', 'clean:gh-pages']);
 
     grunt.registerTask('gh', ['cleanup', 'markdown:gh-pages', 'gh-pages', 'cleanup']);
-    grunt.registerTask('publish', ['build', 'update-json', 'gitcommit:publish', 'gh', 'gittag:publish', 'gitpush:publish']);
+    grunt.registerTask('publish', ['build', 'modify_json', 'gitcommit:publish', 'gh', 'gittag:publish', 'gitpush:publish']);
 
 };
