@@ -175,6 +175,10 @@
     /**
      * Normalize touch events with data from first touch in the jQuery.Event
      *
+     * This could be done using the `jQuery.fixHook` api, but to avoid conflicts
+     * with other libraries that might already have applied a fix hook, this
+     * approach is used instead.
+     *
      * @param {jQuery.Event} event
      * @private
      */
@@ -296,6 +300,10 @@
          */
         onEnd: function(e) {
             var event;
+
+            if (e.isTrigger) {
+                return;
+            }
 
             _normalizeEvent(e);
 
