@@ -1,33 +1,6 @@
 module.exports = function(grunt) {
     'use strict';
 
-    var git = {
-
-        exec: function(command, callback) {
-            if (grunt.util.kindOf(command) !== 'array') {
-                grunt.fail.fatal('Invalid command argument type. Must be string or array')
-            }
-
-            grunt.util.spawn({
-                cmd: 'gig',
-                args: command
-            }, callback);
-        },
-
-        commit: function(message, callback) {
-            git.exec(['commit', '-m', message], callback);
-        },
-
-        tag: function(tag, callback) {
-            git.exec(['tag', tag], callback);
-        },
-
-        push: function(branch, remote) {
-            git.exec(['push', '--tags', remote, branch], callback);
-        }
-
-    };
-
     // If tag flag is not defined, use the current tag (found in package.json)
     if (!grunt.option('tag')) {
         grunt.option('tag', grunt.file.readJSON('package.json').version);
