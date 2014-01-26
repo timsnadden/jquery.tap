@@ -6,7 +6,6 @@
     <meta name="description" content="jQuery.tap : A jQuery plugin that creates a click alternative for touch enabled browsers" />
     <title>jQuery.tap | jQuery Plugin</title>
     <link rel="stylesheet" type="text/css" media="screen" href="assets/css/stylesheet.css">
-    <script src="assets/js/main.js"></script>
     <script src="http://code.jquery.com/jquery-1.9.0.min.js"></script>
 </head>
 <body>
@@ -16,12 +15,12 @@
         <header class="inner">
           <a id="forkme_banner" target="_blank" href="https://github.com/aarongloege/jquery.tap">View on GitHub</a>
 
-          <h1 id="project_title">jQuery.tap <span class="version">:)</span></h1>
+          <h1 id="project_title">jQuery.tap <span class="version"></span></h1>
           <h2 id="project_tagline">A jQuery plugin that creates a click alternative for touch enabled browsers</h2>
 
             <section id="downloads">
-                <a class="zip_download_link" target="_blank" data-type="download" href="https://github.com/aarongloege/jquery.tap/zipball/master">Download this project as a .zip file</a>
-                <a class="tar_download_link" target="_blank" data-type="download" href="https://github.com/aarongloege/jquery.tap/tarball/master">Download this project as a tar.gz file</a>
+                <a class="zip_download_link" target="_blank" data-type="download" href="https://github.com/aarongloege/jquery.tap/archive/.zip">Download this project as a .zip file</a>
+                <a class="tar_download_link" target="_blank" data-type="download" href="https://github.com/aarongloege/jquery.tap/archive/.tar.gz">Download this project as a tar.gz file</a>
             </section>
         </header>
     </div>
@@ -29,53 +28,50 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>jQuery.tap</h1>
-        <p>A jQuery plugin that creates a click alternative for touch enabled browsers.</p>
-        <h2>Why?</h2>
-        <p>Click events on touch devices do not work the best. There is a 300ms delay from when you release your finger to the time the click event is triggered. This behavior is not desired.</p>
-        <h2>How do I use it?</h2>
-        <p>What is nice about this plugin, and what makes it different from other plugins, is that it takes advantage of jQuery's special event API, so you can use <code>jQuery.on</code> to bind events.</p>
-        <div class="highlight">
-            <pre><span class="c1">// jQuery.on method</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap'</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap'</span><span class="p">,</span> <span class="nx">dataObject</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span></pre>
-        </div>
-        <p>And, because the event is bound through jQuery's <code>on</code> API, you can take advantage of namespaces and delegate events:</p>
-        <div class="highlight">
-            <pre><span class="c1">// Namespace</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap.widget'</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap.widget'</span><span class="p">,</span> <span class="nx">dataObject</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
+        <h1 id="jquery-tap">jQuery.tap</h1>
+<p><a href="http://aarongloege.github.com/jquery.tap/">http://aarongloege.github.com/jquery.tap/</a>
+A jQuery plugin that creates a click alternative for touch enabled browsers.</p>
+<h2 id="why-">Why?</h2>
+<p>Click events on touch devices do not work the best. There is a ~300ms delay from when you release your finger to the time the click event is triggered. This behavior is not desired. :(</p>
+<h2 id="how-do-i-use-it-">How do I use it?</h2>
+<p>What is nice about this plugin, and what makes it different from other plugins, is that it takes advantage of jQuery&#39;s special event API, so you can use <code>jQuery.on</code> to bind events.</p>
+<pre><code class="lang-javascript"><span class="comment">// jQuery.on method</span>
+$(<span class="string">'.element'</span>).on(<span class="string">'tap'</span>, onTapHandler);
+$(<span class="string">'.element'</span>).on(<span class="string">'tap'</span>, dataObject, onTapHandler);</code></pre>
+<p>And, because the event is bound through jQuery&#39;s <code>on</code> API, you can take advantage of namespaces and delegate events:</p>
+<pre><code class="lang-javascript"><span class="comment">// Namespace</span>
+$(<span class="string">'.element'</span>).on(<span class="string">'tap.widget'</span>, onTapHandler);
+$(<span class="string">'.element'</span>).on(<span class="string">'tap.widget'</span>, dataObject, onTapHandler);
 
-<span class="c1">// Delegate</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap'</span><span class="p">,</span> <span class="s1">'.child-element'</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap'</span><span class="p">,</span> <span class="s1">'.child-element'</span><span class="p">,</span> <span class="nx">dataObject</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
+<span class="comment">// Delegate</span>
+$(<span class="string">'.element'</span>).on(<span class="string">'tap'</span>, <span class="string">'.child-element'</span>, onTapHandler);
+$(<span class="string">'.element'</span>).on(<span class="string">'tap'</span>, <span class="string">'.child-element'</span>, dataObject, onTapHandler);
 
-<span class="c1">// Together now</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap.widget'</span><span class="p">,</span> <span class="s1">'.child-element'</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span>
-<span class="nx">$</span><span class="p">(</span><span class="s1">'.element'</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">'tap.widget'</span><span class="p">,</span> <span class="s1">'.child-element'</span><span class="p">,</span> <span class="nx">dataObject</span><span class="p">,</span> <span class="nx">onTapHandler</span><span class="p">);</span></pre>
-        </div>
-        <p>The tap event will also bubble.</p>
-        <h2>What About Desktop?</h2>
-        <p>If the browser does not support touch events, then the regular click event will be used. No need for if/else statements, jQuery.tap will do that for you.</p>
-        <h2>Tests</h2>
-        You can view an integration test <a target="_blank" href="test/">here</a> and you can test support for yourself <a href="example/">here</a>.
-        <h2>Licence</h2>
-        <p>jQuery.tap is licensed under the <a target="_blank" href="http://opensource.org/licenses/mit-license.html">MIT license</a>.</p>
+<span class="comment">// Together now</span>
+$(<span class="string">'.element'</span>).on(<span class="string">'tap.widget'</span>, <span class="string">'.child-element'</span>, onTapHandler);
+$(<span class="string">'.element'</span>).on(<span class="string">'tap.widget'</span>, <span class="string">'.child-element'</span>, dataObject, onTapHandler);</code></pre>
+<p>The tap event will also bubble.</p>
+<h2 id="what-about-desktop-">What About Desktop?</h2>
+<p>If the browser does not support touch events, then the regular mouse events to create a tap event. No need for if/else statements, jQuery.tap will do that for you.</p>
+<h2 id="now-what-about-browsers-that-support-both-touch-and-mouse-">Now What About Browsers That Support Both Touch and Mouse?</h2>
+<p>Gotcha covered. jQuery.tap listens for both touch and mouse events and will use the first event that is fired to detect a tap.</p>
+<h2 id="caveats">Caveats</h2>
+<h3 id="click-events">Click events</h3>
+<p>There is currently not a way to stop the <code>click</code> event from triggering after <code>touchstart</code>/<code>touchend</code> and <code>mousedown</code>/<code>mouseup</code> events if the <code>tap</code> event is canceled with <code>preventDefault()</code>. The <code>click</code> event will still fire, but <code>preventDefault</code> will be called on that <code>click</code> event if <code>preventDefault</code> was called on the tap event.</p>
+<h2 id="licence">Licence</h2>
+<p>jQuery.tap is licensed under the <a href="http://opensource.org/licenses/mit-license.html">MIT license</a>.</p>
+
       </section>
     </div>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
-    <footer class="inner">
-        <p class="copyright">jQuery.tap maintained by <a target="_blank" href="https://github.com/aarongloege">aarongloege</a></p>
-    </footer>
+        <footer class="inner">
+            <p class="copyright">jQuery.tap maintained by <a target="_blank" href="https://github.com/aarongloege">aarongloege</a></p>
+        </footer>
     </div>
     <script type="text/javascript">
         (function(window, $) {
-            $('.version').text(APP.getVersion());
-            $('.zip_download_link').attr('href', APP.getDownload());
-            $('.tar_download_link').attr('href', APP.getDownload('tar'));
-
             window._gaq = window._gaq || [];
             _gaq.push(['_setAccount', 'UA-37736770-1']);
             _gaq.push(['_trackPageview']);
