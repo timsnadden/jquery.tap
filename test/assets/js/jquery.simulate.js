@@ -1,14 +1,18 @@
 (function($, document) {
     'use strict';
 
-    var _addTouch = function(count, x, y) {
+    var _addTouch = function(count, e) {
         var touches = [];
         var i = 0;
 
         for (; i < count; i++) {
             touches.push({
-                clientX: x,
-                clientY: y
+                clientX: e.clientX,
+                clientY: e.clientY,
+                pageX: e.pageX,
+                pageY: e.pageY,
+                screenX: e.screenX,
+                screenY: e.screenY
             });
         }
 
@@ -45,13 +49,25 @@
             );
 
             if (type.indexOf('touch') === 0) {
-                e.changedTouches = _addTouch(touches, options.clientX, options.clientY);
+                e.changedTouches = _addTouch(touches, e);
                 if (type !== 'touchend' || rawTouches) {
-                    e.touches = _addTouch(touches, options.clientX, options.clientY);
+                    e.touches = _addTouch(touches, e);
                 } else {
                     e.touches = [];
                 }
             }
+
+            // FF seems to bork the timeStamp property when
+            // simulating a event. Manually set a getter that
+            // returns a Date.now() value
+            try {
+                var now = Date.now();
+                Object.defineProperty(e, 'timeStamp', {
+                    get: function() {
+                        return now;
+                    }
+                });
+            } catch(e) {}
 
             this.dispatchEvent(e);
         });

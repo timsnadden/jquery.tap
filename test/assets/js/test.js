@@ -12,15 +12,14 @@
     var $touchA = $(touchA);
     var $touchB = $(touchB);
 
-    beforeEach(function() {
-        $.support.touch = this.touch === true;
-    });
-
     afterEach(function() {
         $body.off('tap');
         $touchA.off('tap');
         $touchB.off('tap');
-        $body.trigger('touchcancel');
+        $body
+            .trigger('touchend')
+            .trigger('mouseup');
+
         spy.reset();
     });
 
@@ -149,287 +148,393 @@
 
     });
 
-    if ($.support.touch) {
+    describe('Touch Events', function() {
 
-        describe('Touch Events', function() {
+        describe('Direct Callback Bindings', function() {
 
-            describe('Direct Callback Bindings', function() {
+            it('will trigger tap event after touchstart, and touchend are triggered', function() {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart')
+                    .simulate('touchend');
 
-                it('will trigger tap event after touchstart, and touchend are triggered', function() {
-                    this.touch = $.support.touch = true;
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will trigger if moved 100px between touchstart and touchend', function() {
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchmove', { clientX: 100, clientY: 100 })
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will trigger if 300ms elapse between touchstart and touchend', function(done) {
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart');
-
-                    setTimeout(function() {
-                        $touchA.simulate('touchend');
-                        try {
-                            expect(spy.callCount).to.be(1);
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }, 300);
-                });
-
-                it('will trigger if 1000ms elapse between touchstart and touchmove', function(done) {
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchmove');
-
-                    setTimeout(function() {
-                        $touchA.simulate('touchend');
-                        try {
-                            expect(spy.callCount).to.be(1);
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }, 1000);
-                });
-
-                it('will trigger tap event on parent element when triggered on child', function() {
-                    $body.on('tap', spy);
-                    $touchA
-                        .simulate('touchstart')
-                        .simulate('touchmove')
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will trigger tap event 2x on parent element when triggered on child', function() {
-                    $body.on('tap', spy);
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchmove')
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(2);
-                });
-
-                it('will not trigger if more than one touch', function() {
-                    $body.on('tap', spy);
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchstart', {}, 2)
-                        .simulate('touchend', {}, 1)
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(0);
-                });
-
-                it('will bubble tap event after touchstart and touchend', function() {
-                    $body.on('tap', spy);
-                    $touchA.on('tap', spy);
-                    $touchB
-                        .simulate('touchstart')
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(2);
-                });
-
+                expect(spy.callCount).to.be(1);
             });
 
-            describe('Delegate Callback Bindings', function() {
+            it('will trigger if moved 10px between touchstart and touchend', function() {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart')
+                    .simulate('touchend', { clientX: 10, clientY: 10 });
 
-                it('will trigger tap event after touchstart, touchmove, and touchend in less than 300ms', function() {
-                    this.touch = $.support.touch = true;
-                    $body.on('tap', touchA, spy);
-                    $touchA
-                        .simulate('touchstart')
-                        .simulate('touchmove')
-                        .simulate('touchend');
+                expect(spy.callCount).to.be(1);
+            });
 
-                    expect(spy.callCount).to.be(1);
-                });
+            it('will trigger if 300ms elapse between touchstart and touchend', function(done) {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart');
 
-                it('will trigger if moved more than 100px between touchstart and touchend', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchA
-                        .simulate('touchstart')
-                        .simulate('touchmove', { clientX: 100, clientY: 100 })
-                        .simulate('touchend');
+                setTimeout(function() {
+                    $touchA.simulate('touchend');
+                    try {
+                        expect(spy.callCount).to.be(1);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 300);
+            });
 
-                    expect(spy.callCount).to.be(1);
-                });
+            it('will not trigger if 1000ms elapse between touchstart and touchend', function(done) {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart');
 
-                it('will trigger if 300ms elapse between touchstart and touchmove', function(done) {
-                    $body.on('tap', touchA, spy);
-                    $touchA
-                        .simulate('touchstart')
-                        .simulate('touchmove');
+                setTimeout(function() {
+                    $touchA.simulate('touchend');
+                    try {
+                        expect(spy.callCount).to.be(0);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 1000);
+            });
 
-                    setTimeout(function() {
-                        $touchA.simulate('touchend');
-                        try {
-                            expect(spy.callCount).to.be(1);
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }, 300);
-                });
+            it('will trigger tap event on parent element when triggered on child', function() {
+                $body.on('tap', spy);
+                $touchA
+                    .simulate('touchstart')
+                    .simulate('touchend');
 
-                it('will trigger if 1000ms elapse between touchstart and touchmove', function(done) {
-                    $body.on('tap', touchA, spy);
-                    $touchA
-                        .simulate('touchstart')
-                        .simulate('touchmove');
+                expect(spy.callCount).to.be(1);
+            });
 
-                    setTimeout(function() {
-                        $touchA.simulate('touchend');
-                        try {
-                            expect(spy.callCount).to.be(1);
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }, 1000);
-                });
+            it('will trigger tap event 2x on parent element when triggered on child', function() {
+                $body.on('tap', spy);
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart')
+                    .simulate('touchend');
 
-                it('will trigger tap event on parent element when triggered on child', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchB
-                        .simulate('touchstart')
-                        .simulate('touchmove')
-                        .simulate('touchend');
+                expect(spy.callCount).to.be(2);
+            });
 
-                    expect(spy.callCount).to.be(1);
-                });
+            it('will not trigger if more than one touch', function() {
+                $body.on('tap', spy);
+                $touchA
+                    .on('tap', spy)
+                    .simulate('touchstart')
+                    .simulate('touchstart', {}, 2)
+                    .simulate('touchend', {}, 1)
+                    .simulate('touchend');
 
-                it('will trigger tap event 2x on parent element when triggered on child', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchB
-                        .on('tap', spy)
-                        .simulate('touchstart')
-                        .simulate('touchmove')
-                        .simulate('touchend');
+                expect(spy.callCount).to.be(0);
+            });
 
-                    expect(spy.callCount).to.be(2);
-                });
+            it('will bubble tap event after touchstart and touchend', function() {
+                $body.on('tap', spy);
+                $touchA.on('tap', spy);
+                $touchB
+                    .simulate('touchstart')
+                    .simulate('touchend');
 
-                it('will bubble tap event after touchstart and touchend', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchA.on('tap',touchB,  spy);
-                    $touchB
-                        .simulate('touchstart')
-                        .simulate('touchend');
-
-                    expect(spy.callCount).to.be(2);
-                });
-
+                expect(spy.callCount).to.be(2);
             });
 
         });
 
-    } else {
+        describe('Delegate Callback Bindings', function() {
 
-        describe('Click Events', function() {
+            it('will trigger tap event after touchstart and touchend in less than 300ms', function() {
+                $body.on('tap', touchA, spy);
+                $touchA
+                    .simulate('touchstart')
+                    .simulate('touchend');
 
-            describe('Direct Callback Bindings', function() {
-
-                it('will trigger tap event on click', function() {
-                    this.touch = $.support.touch = false;
-                    $touchA
-                        .on('tap', spy)
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will trigger tap event on parent element when triggered on child bound to parent', function() {
-                    $body.on('tap', spy);
-                    $touchA
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will bubble tap event after click event', function() {
-                    $body.on('tap', spy);
-                    $touchA.on('tap', spy);
-                    $touchB
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(2);
-                });
+                expect(spy.callCount).to.be(1);
             });
 
-            describe('Delegate Callback Bindings', function() {
+            it('will trigger if moved more than 10px between touchstart and touchend', function() {
+                $body.on('tap', touchA, spy);
+                $touchA
+                    .simulate('touchstart')
+                    .simulate('touchend', { clientX: 10, clientY: 10 });
 
-                it('will trigger tap event on click', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchA
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will trigger tap event on parent element when triggered on child and bound to parent', function() {
-                    $body.on('tap', touchA, spy);
-                    $touchB
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
-                it('will bubble tap event after click event', function() {
-                    $body.on('tap', touchB, spy);
-                    $touchA
-                        .on('tap', touchB, spy)
-                        .on('tap', spy);
-                    $touchB
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(3);
-                });
-
-                it('will only trigger single tap event and not delegate tap events', function() {
-                    $body.on('tap', touchB, spy);
-                    $touchA
-                        .on('tap', touchB, spy)
-                        .on('tap', spy)
-                        .simulate('mousedown')
-                        .simulate('mouseup');
-
-                    expect(spy.callCount).to.be(1);
-                });
-
+                expect(spy.callCount).to.be(1);
             });
+
+            it('will trigger if 300ms elapse between touchstart and touchend', function(done) {
+                $body.on('tap', touchA, spy);
+                $touchA.simulate('touchstart');
+
+                setTimeout(function() {
+                    $touchA.simulate('touchend');
+                    try {
+                        expect(spy.callCount).to.be(1);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 300);
+            });
+
+            it('will not trigger if 1000ms elapse between touchstart and touchend', function(done) {
+                $body.on('tap', touchA, spy);
+                $touchA.simulate('touchstart');
+
+                setTimeout(function() {
+                    $touchA.simulate('touchend');
+                    try {
+                        expect(spy.callCount).to.be(0);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 1000);
+            });
+
+            it('will trigger tap event on parent element when triggered on child', function() {
+                $body.on('tap', touchA, spy);
+                $touchB
+                    .simulate('touchstart')
+                    .simulate('touchend');
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger tap event 2x on parent element when triggered on child', function() {
+                $body.on('tap', touchA, spy);
+                $touchB
+                    .on('tap', spy)
+                    .simulate('touchstart')
+                    .simulate('touchend');
+
+                expect(spy.callCount).to.be(2);
+            });
+
+            it('will bubble tap event after touchstart and touchend', function() {
+                $body.on('tap', touchA, spy);
+                $touchA.on('tap',touchB,  spy);
+                $touchB
+                    .simulate('touchstart')
+                    .simulate('touchend');
+
+                expect(spy.callCount).to.be(2);
+            });
+
         });
-    }
+
+    });
+
+    describe('Mouse Events', function() {
+
+        describe('Direct Callback Bindings', function() {
+
+            it('will trigger tap event after mousedown, and mouseup are triggered', function() {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger if moved 10px between mousedown and mouseup', function() {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown')
+                    .simulate('mouseup', { clientX: 10, clientY: 10 });
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will not trigger if moved 500px between mousedown and mouseup', function() {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown')
+                    .simulate('mouseup', { clientX: 500, clientY: 100 });
+
+                expect(spy.callCount).to.be(0);
+            });
+
+            it('will trigger if 300ms elapse between mousedown and mouseup', function(done) {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown');
+
+                setTimeout(function() {
+                    $touchA.simulate('mouseup');
+                    try {
+                        expect(spy.callCount).to.be(1);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 300);
+            });
+
+            it('will not trigger if 1000ms elapse between mousedown and mouseup', function(done) {
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown');
+
+                setTimeout(function() {
+                    $touchA.simulate('mouseup');
+                    try {
+                        expect(spy.callCount).to.be(0);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 1000);
+            });
+
+            it('will trigger tap event on parent element when triggered on child', function() {
+                $body.on('tap', spy);
+                $touchA
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger tap event 2x on parent element when triggered on child', function() {
+                $body.on('tap', spy);
+                $touchA
+                    .on('tap', spy)
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(2);
+            });
+
+            it('will bubble tap event after mousedown and mouseup', function() {
+                $body.on('tap', spy);
+                $touchA.on('tap', spy);
+                $touchB
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(2);
+            });
+
+        });
+
+        describe('Delegate Callback Bindings', function() {
+
+            it('will trigger tap event after mousedown and mouseup in less than 300ms', function() {
+                $body.on('tap', touchA, spy);
+                $touchA
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger if moved more than 10px between mousedown and mouseup', function() {
+                $body.on('tap', touchA, spy);
+                $touchA
+                    .simulate('mousedown')
+                    .simulate('mouseup', { clientX: 10, clientY: 10 });
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger if 300ms elapse between mousedown and mouseup', function(done) {
+                $body.on('tap', touchA, spy);
+                $touchA.simulate('mousedown');
+
+                setTimeout(function() {
+                    $touchA.simulate('mouseup');
+                    try {
+                        expect(spy.callCount).to.be(1);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 300);
+            });
+
+            it('will not trigger if 1000ms elapse between mousedown and mouseup', function(done) {
+                $body.on('tap', touchA, spy);
+                $touchA.simulate('mousedown');
+
+                setTimeout(function() {
+                    $touchA.simulate('mouseup');
+                    try {
+                        expect(spy.callCount).to.be(0);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }, 1000);
+            });
+
+            it('will trigger tap event on parent element when triggered on child', function() {
+                $body.on('tap', touchA, spy);
+                $touchB
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(1);
+            });
+
+            it('will trigger tap event 2x on parent element when triggered on child', function() {
+                $body.on('tap', touchA, spy);
+                $touchB
+                    .on('tap', spy)
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(2);
+            });
+
+            it('will bubble tap event after mousedown and mouseup', function() {
+                $body.on('tap', touchA, spy);
+                $touchA.on('tap',touchB,  spy);
+                $touchB
+                    .simulate('mousedown')
+                    .simulate('mouseup');
+
+                expect(spy.callCount).to.be(2);
+            });
+
+        });
+
+    });
+
+    describe('Touch/Mouse Detection', function() {
+
+        it('will ignore mouse events if touchstart fires first', function() {
+            $touchA
+                .on('tap', spy)
+                .simulate('touchstart')
+                .simulate('mousedown')
+                .simulate('mouseup')
+                .simulate('touchend');
+
+            expect(spy.callCount).to.be(1);
+        });
+
+        it('will ignore touch events if mousedown fires first', function() {
+            $touchA
+                .on('tap', spy)
+                .simulate('mousedown')
+                .simulate('touchstart')
+                .simulate('touchend')
+                .simulate('mouseup');
+
+            expect(spy.callCount).to.be(1);
+        });
+
+    });
 
     $(document).ready(function() {
-        mocha.run();
+        setTimeout(function() {
+            mocha.run();
+        }, 1000);
     });
 
 }(jQuery, mocha));
