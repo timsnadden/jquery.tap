@@ -1,9 +1,11 @@
 module.exports = function(grunt) {
     'use strict';
+    
+    var tag = grunt.option('tag');
 
-    // If tag flag is not defined, use the current tag (found in package.json)
-    if (!grunt.option('tag')) {
-        grunt.option('tag', grunt.file.readJSON('package.json').version);
+    // If tag is not defined, use the current tag (found in package.json)
+    if (!tag) {
+        tag = grunt.file.readJSON('package.json').version;
     }
 
     // -- Plugins --------------------------------------------------------------
@@ -18,6 +20,7 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
 
+        // Watch for file changes
         watch: {
             scripts: {
                 files: [
@@ -25,15 +28,10 @@ module.exports = function(grunt) {
                     './Gruntfile.js'
                 ],
                 tasks: ['build']
-            },
-            markdown: {
-                files: [
-                    './README.md'
-                ],
-                task: ['markdown']
             }
         },
 
+        // Compress plugin
         uglify: {
             minify: {
                 files: {
@@ -42,6 +40,7 @@ module.exports = function(grunt) {
             }
         },
 
+        // Copy files over to the gh-pages branch and push them.
         'gh-pages': {
             options: {
                 add: true,
@@ -58,6 +57,7 @@ module.exports = function(grunt) {
             }
         },
 
+        // Remove temporary files
         clean: {
             'gh-pages': {
                 src: ['./.grunt']
@@ -67,6 +67,7 @@ module.exports = function(grunt) {
             }
         },
 
+        // Generate github page
         markdown: {
             'gh-pages': {
                 files: [
@@ -78,7 +79,7 @@ module.exports = function(grunt) {
                 options: {
                     template: './markdown.template',
                     templateContext: {
-                        version: grunt.option('tag')
+                        version: tag
                     },
                     markdownOptions: {
                         highlight: 'manual',
@@ -88,22 +89,25 @@ module.exports = function(grunt) {
             }
         },
 
+        // commit new version
         gitcommit: {
             publish: {
                 options: {
-                    message: 'Version bump to v' + grunt.option('tag')
+                    message: 'Version bump to v' + tag
                 }
             }
         },
 
+        // tag new version
         gittag: {
             publish: {
                 options: {
-                    tag: grunt.option('tag')
+                    tag: tag
                 }
             }
         },
 
+        // push changes (including tags) to origin
         gitpush: {
             publish: {
                 options: {
@@ -113,17 +117,18 @@ module.exports = function(grunt) {
             }
         },
 
+        // Update json files with the tag
         'update-json': {
             'plugin': {
                 file: 'tap.jquery.json',
                 fields: {
-                    version: grunt.option('tag')
+                    version: tag
                 }
             },
             'package': {
                 file:  'package.json',
                 fields: {
-                    version: grunt.option('tag')
+                    version: tag
                 }
             }
         }
