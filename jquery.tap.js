@@ -97,6 +97,14 @@
     var _lastTap;
 
     /**
+     * Tap timeout id
+     *
+     * @type Number
+     * @private
+     */
+    var _timeout;
+
+    /**
      * Object for tracking current touch
      *
      * @type Object
@@ -289,6 +297,8 @@
             } else {
                 $BODY.on('mouseup' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onEnd);
             }
+
+            _timeout = setTimeout(Tap.onCancel, MAX_TAP_TIME);
         },
 
         /**
@@ -331,6 +341,7 @@
          * @param {jQuery.Event} e
          */
         onCancel: function(e) {
+            clearTimeout(_timeout);
             Tap.isTracking = false;
 
             $BODY.off(HELPER_ACTIVE_NAMESPACE);
