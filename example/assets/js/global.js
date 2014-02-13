@@ -12,7 +12,7 @@
 
                 $touchInner.prepend("Tap {\n    x: " + e.pageX + ",\n    y: " + e.pageY + "\n    e: " + type + "\n};\n");
             })
-            .on('tap', 'a', function(e) {
+            .on('tap', '.js-prevent-default', function(e) {
                 e.preventDefault();
             });
 

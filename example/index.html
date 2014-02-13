@@ -14,7 +14,12 @@
 </head>
 <body>
     <div class="touch-area">
-        <p>Calling preventDefault() with the tap event with also prevent the default behavior for the click event that usually occurs after the tap event. This is useful for <a href="http://www.google.com">links</a>.</p>
+        <p>Calling preventDefault() with the tap event with also prevent the default behavior for the click event that usually occurs after the tap event. This is useful for <a class="js-prevent-default" href="http://www.google.com">links</a>.</p>
+        <p><a class="js-prevent-default" href="#1">Do Not Allow Default Click 1</a></p>
+        <p><a class="js-prevent-default" href="#2">Do Not Allow Default Click 2</a></p>
+        <p><a class="js-prevent-default" href="#3">Do Not Allow Default Click 3</a></p>
+        <p><a href="#4">Allow Default Click 4</a></p>
+        <p><a href="#5">Allow Default Click 5</a></p>
     </div>
     <div class="touch-results">
         <div class="touch-inner"></div>

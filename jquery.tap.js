@@ -94,7 +94,7 @@
      * @type jQuery.Event
      * @private
      */
-    var _lastCanceledTap = $.Event();
+    var _lastTap;
 
     /**
      * Object for tracking current touch
@@ -309,15 +309,18 @@
 
             if (_isTap(e)) {
                 event = _createEvent(EVENT_NAME, e);
+                _lastTap = event;
                 $(TOUCH_VALUES.event.target).trigger(event);
+                e.preventDefault();
             }
 
-            // Cancel tap tracking
+            // Cancel active tap tracking
             Tap.onCancel(e);
 
-            // prevent `click` event from firing if tap event was canceled (using `preventDefault()`)
-            if (event && event.isDefaultPrevented()) {
-                _lastCanceledTap = event;
+            // Manually trigger a click for touch events since `e.preventDefault()` cancels the default click event.
+            // And since we have the power - don't trigger click if tap had `preventDefault` called
+            if (!event.isDefaultPrevented() && e.touches) {
+                TOUCH_VALUES.event.target.click();
             }
         },
 
@@ -343,10 +346,12 @@
         onClick: function(e) {
             if (
                 !e.isTrigger &&
-                _lastCanceledTap.target === e.target &&
-                _lastCanceledTap.pageX === e.pageX &&
-                _lastCanceledTap.pageY === e.pageY &&
-                e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
+                _lastTap &&
+                _lastTap.isDefaultPrevented() &&
+                _lastTap.target === e.target &&
+                _lastTap.pageX === e.pageX &&
+                _lastTap.pageY === e.pageY &&
+                e.timeStamp - _lastTap.timeStamp < MAX_TAP_TIME
             ) {
                 return false;
             }
