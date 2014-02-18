@@ -97,14 +97,6 @@
     var _lastTap;
 
     /**
-     * Tap timeout id
-     *
-     * @type Number
-     * @private
-     */
-    var _timeout;
-
-    /**
      * Object for tracking current touch
      *
      * @type Object
@@ -297,8 +289,6 @@
             } else {
                 $BODY.on('mouseup' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onEnd);
             }
-
-            _timeout = setTimeout(Tap.onCancel, MAX_TAP_TIME);
         },
 
         /**
@@ -329,7 +319,7 @@
 
             // Manually trigger a click for touch events since `e.preventDefault()` cancels the default click event.
             // And since we have the power - don't trigger click if tap had `preventDefault` called
-            if (!event.isDefaultPrevented() && e.touches) {
+            if (event && !event.isDefaultPrevented() && e.touches) {
                 TOUCH_VALUES.event.target.click();
             }
         },
@@ -341,7 +331,10 @@
          * @param {jQuery.Event} e
          */
         onCancel: function(e) {
-            clearTimeout(_timeout);
+            if (e && e.type === 'touchcancel') {
+                e.preventDefault();
+            }
+
             Tap.isTracking = false;
 
             $BODY.off(HELPER_ACTIVE_NAMESPACE);
