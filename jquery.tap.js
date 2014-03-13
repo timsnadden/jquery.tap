@@ -184,9 +184,8 @@
      */
     var _normalizeEvent = function(event) {
         if (event.type.indexOf('touch') === 0) {
-            var touch = event.originalEvent.changedTouches[0];
-
             event.touches = event.originalEvent.changedTouches;
+            var touch = event.touches[0];
 
             var i = 0;
             var length = EVENT_VARIABLES.length;
@@ -357,6 +356,7 @@
                 _lastTap.pageY === e.pageY &&
                 e.timeStamp - _lastTap.timeStamp < MAX_TAP_TIME
             ) {
+                _lastTap = null;
                 return false;
             }
         }
