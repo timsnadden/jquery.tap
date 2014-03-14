@@ -94,7 +94,7 @@
      * @type jQuery.Event
      * @private
      */
-    var _lastCanceledTap = $.Event();
+    var _lastTap;
 
     /**
      * Object for tracking current touch
@@ -175,14 +175,17 @@
     /**
      * Normalize touch events with data from first touch in the jQuery.Event
      *
+     * This could be done using the `jQuery.fixHook` api, but to avoid conflicts
+     * with other libraries that might already have applied a fix hook, this
+     * approach is used instead.
+     *
      * @param {jQuery.Event} event
      * @private
      */
     var _normalizeEvent = function(event) {
         if (event.type.indexOf('touch') === 0) {
-            var touch = event.originalEvent.changedTouches[0];
-
             event.touches = event.originalEvent.changedTouches;
+            var touch = event.touches[0];
 
             var i = 0;
             var length = EVENT_VARIABLES.length;
@@ -297,19 +300,26 @@
         onEnd: function(e) {
             var event;
 
+            if (e.isTrigger) {
+                return;
+            }
+
             _normalizeEvent(e);
 
             if (_isTap(e)) {
                 event = _createEvent(EVENT_NAME, e);
+                _lastTap = event;
                 $(TOUCH_VALUES.event.target).trigger(event);
+                e.preventDefault();
             }
 
-            // Cancel tap tracking
+            // Cancel active tap tracking
             Tap.onCancel(e);
 
-            // prevent `click` event from firing if tap event was canceled (using `preventDefault()`)
-            if (event && event.isDefaultPrevented()) {
-                _lastCanceledTap = event;
+            // Manually trigger a click for touch events since `e.preventDefault()` cancels the default click event.
+            // And since we have the power - don't trigger click if tap had `preventDefault` called
+            if (event && !event.isDefaultPrevented() && e.touches) {
+                TOUCH_VALUES.event.target.click();
             }
         },
 
@@ -320,6 +330,10 @@
          * @param {jQuery.Event} e
          */
         onCancel: function(e) {
+            if (e && e.type === 'touchcancel') {
+                e.preventDefault();
+            }
+
             Tap.isTracking = false;
 
             $BODY.off(HELPER_ACTIVE_NAMESPACE);
@@ -335,21 +349,21 @@
         onClick: function(e) {
             if (
                 !e.isTrigger &&
-                _lastCanceledTap.target === e.target &&
-                _lastCanceledTap.pageX === e.pageX &&
-                _lastCanceledTap.pageY === e.pageY &&
-                e.timeStamp - _lastCanceledTap.timeStamp < MAX_TAP_TIME
+                _lastTap &&
+                _lastTap.isDefaultPrevented() &&
+                _lastTap.target === e.target &&
+                _lastTap.pageX === e.pageX &&
+                _lastTap.pageY === e.pageY &&
+                e.timeStamp - _lastTap.timeStamp < MAX_TAP_TIME
             ) {
+                _lastTap = null;
                 return false;
             }
         }
 
     };
 
-    // Setup special event and enable
-    // tap only if a tap event is bound
-    $.event.special[EVENT_NAME] = {
-        setup: Tap.enable
-    };
+    // Enable tab when document is ready
+    $(document).ready(Tap.enable);
 
 }(document, jQuery));
