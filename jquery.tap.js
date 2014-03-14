@@ -363,10 +363,7 @@
 
     };
 
-    // Setup special event and enable
-    // tap only if a tap event is bound
-    $.event.special[EVENT_NAME] = {
-        setup: Tap.enable
-    };
+    // Enable tab when document is ready
+    $(document).ready(Tap.enable);
 
 }(document, jQuery));
