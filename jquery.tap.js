@@ -184,9 +184,8 @@
      */
     var _normalizeEvent = function(event) {
         if (event.type.indexOf('touch') === 0) {
-            var touch = event.originalEvent.changedTouches[0];
-
             event.touches = event.originalEvent.changedTouches;
+            var touch = event.touches[0];
 
             var i = 0;
             var length = EVENT_VARIABLES.length;
@@ -357,16 +356,14 @@
                 _lastTap.pageY === e.pageY &&
                 e.timeStamp - _lastTap.timeStamp < MAX_TAP_TIME
             ) {
+                _lastTap = null;
                 return false;
             }
         }
 
     };
 
-    // Setup special event and enable
-    // tap only if a tap event is bound
-    $.event.special[EVENT_NAME] = {
-        setup: Tap.enable
-    };
+    // Enable tab when document is ready
+    $(document).ready(Tap.enable);
 
 }(document, jQuery));

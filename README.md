@@ -9,7 +9,7 @@ Click events on touch devices do not work the best. There is a ~300ms delay from
 
 ## How do I use it?
 
-What is nice about this plugin, and what makes it different from other plugins, is that it takes advantage of jQuery's special event API, so you can use `jQuery.on` to bind events.
+What is nice about this plugin, and what makes it different from other plugins, is that it is globally triggered simply by including the script. No need to enable it on an element you with to capture it from.
 
 ```javascript
 // jQuery.on method
