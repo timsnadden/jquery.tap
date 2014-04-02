@@ -194,6 +194,10 @@
                 event[EVENT_VARIABLES[i]] = touch[EVENT_VARIABLES[i]];
             }
         }
+
+        if (!event.timeStamp) {
+            event.timeStamp = Date.now();
+        }
     };
 
     /**
