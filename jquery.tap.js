@@ -196,7 +196,7 @@
         }
 
         if (!event.timeStamp) {
-            event.timeStamp = Date.now();
+            event.timeStamp = new Date().getTime();
         }
     };
 
