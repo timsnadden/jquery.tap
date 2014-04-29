@@ -97,6 +97,14 @@
     var _lastTap;
 
     /**
+     * Last touchstart event
+     *
+     * @type jQuery.Event
+     * @private
+     */
+    var _lastTouch;
+
+    /**
      * Object for tracking current touch
      *
      * @type Object
@@ -173,6 +181,25 @@
     };
 
     /**
+     * Determine if mousedown event was emulated from the last touchstart event
+     *
+     * @function
+     * @param {jQuery.Event} e
+     * @returns {Boolean}
+     * @private
+     */
+    var _isEmulated = function(e) {
+        var xDelta = Math.abs(e.pageX - _lastTouch.pageX);
+        var yDelta = Math.abs(e.pageY - _lastTouch.pageY);
+        var delta = Math.max(xDelta, yDelta);
+
+        return (
+            Math.abs(e.timeStamp - _lastTouch.timeStamp) < 750 &&
+            delta < MAX_TAP_DELTA
+        );
+    };
+
+    /**
      * Normalize touch events with data from first touch in the jQuery.Event
      *
      * This could be done using the `jQuery.fixHook` api, but to avoid conflicts
@@ -193,6 +220,10 @@
             for (; i < length; i++) {
                 event[EVENT_VARIABLES[i]] = touch[EVENT_VARIABLES[i]];
             }
+        }
+
+        if (!event.timeStamp) {
+            event.timeStamp = new Date().getTime();
         }
     };
 
@@ -277,11 +308,16 @@
                 return;
             }
 
+            if (!e.touches && _isEmulated(e)) {
+                return;
+            }
+
             Tap.isTracking = true;
 
             TOUCH_VALUES.event = e;
 
             if (e.touches) {
+                _lastTouch = e;
                 $BODY
                     .on('touchend' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onEnd)
                     .on('touchcancel' + HELPER_NAMESPACE + HELPER_ACTIVE_NAMESPACE, Tap.onCancel);
@@ -310,17 +346,10 @@
                 event = _createEvent(EVENT_NAME, e);
                 _lastTap = event;
                 $(TOUCH_VALUES.event.target).trigger(event);
-                e.preventDefault();
             }
 
             // Cancel active tap tracking
             Tap.onCancel(e);
-
-            // Manually trigger a click for touch events since `e.preventDefault()` cancels the default click event.
-            // And since we have the power - don't trigger click if tap had `preventDefault` called
-            if (event && !event.isDefaultPrevented() && e.touches) {
-                TOUCH_VALUES.event.target.click();
-            }
         },
 
         /**
@@ -354,7 +383,7 @@
                 _lastTap.target === e.target &&
                 _lastTap.pageX === e.pageX &&
                 _lastTap.pageY === e.pageY &&
-                e.timeStamp - _lastTap.timeStamp < MAX_TAP_TIME
+                e.timeStamp - _lastTap.timeStamp < 750
             ) {
                 _lastTap = null;
                 return false;
