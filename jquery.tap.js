@@ -63,7 +63,7 @@
      * @type Number
      * @final
      */
-    var MAX_TAP_DELTA = 40;
+    var MAX_TAP_DELTA = 10;
 
     /**
      * Max duration between touchstart and touchend to be considered a tap
@@ -189,6 +189,10 @@
      * @private
      */
     var _isEmulated = function(e) {
+        if (!_lastTouch) {
+            return false;
+        }
+
         var xDelta = Math.abs(e.pageX - _lastTouch.pageX);
         var yDelta = Math.abs(e.pageY - _lastTouch.pageY);
         var delta = Math.max(xDelta, yDelta);
