@@ -189,6 +189,10 @@
      * @private
      */
     var _isEmulated = function(e) {
+        if (!_lastTouch) {
+            return false;
+        }
+
         var xDelta = Math.abs(e.pageX - _lastTouch.pageX);
         var yDelta = Math.abs(e.pageY - _lastTouch.pageY);
         var delta = Math.max(xDelta, yDelta);
