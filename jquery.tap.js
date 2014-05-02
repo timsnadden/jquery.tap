@@ -226,9 +226,8 @@
             }
         }
 
-        if (!event.timeStamp) {
-            event.timeStamp = new Date().getTime();
-        }
+        // Normalize timestamp
+        event.timeStamp = Date.now ? Date.now() : +new Date();
     };
 
     /**
