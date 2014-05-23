@@ -58,22 +58,6 @@
     var EVENT_NAME = 'tap';
 
     /**
-     * Max distance between touchstart and touchend to be considered a tap
-     *
-     * @type Number
-     * @final
-     */
-    var MAX_TAP_DELTA = 10;
-
-    /**
-     * Max duration between touchstart and touchend to be considered a tap
-     *
-     * @type Number
-     * @final
-     */
-    var MAX_TAP_TIME = 400;
-
-    /**
      * Event variables to copy to touches
      *
      * @type String[]
@@ -173,8 +157,8 @@
         var delta = Math.max(xDelta, yDelta);
 
         return (
-            e.timeStamp - startEvent.timeStamp < MAX_TAP_TIME &&
-            delta < MAX_TAP_DELTA &&
+            e.timeStamp - startEvent.timeStamp < $.tap.TIME_DELTA &&
+            delta < $.tap.POSITION_DELTA &&
             (!startEvent.touches || TOUCH_VALUES.count === 1) &&
             Tap.isTracking
         );
@@ -199,7 +183,7 @@
 
         return (
             Math.abs(e.timeStamp - _lastTouch.timeStamp) < 750 &&
-            delta < MAX_TAP_DELTA
+            delta < $.tap.POSITION_DELTA
         );
     };
 
@@ -297,11 +281,16 @@
          * @param {jQuery.Event} e
          */
         onStart: function(e) {
-            if (e.isTrigger || (e.type.indexOf('mouse') === 0 && e.which !== 1)) {
+            if (e.isTrigger) {
                 return;
             }
 
             _normalizeEvent(e);
+
+            // Ignore non left mouse clicks
+            if ($.tap.LEFT_BUTTON_ONLY && !e.touches && e.which !== 1) {
+                return;
+            }
 
             if (e.touches) {
                 TOUCH_VALUES.count = e.touches.length;
@@ -397,5 +386,12 @@
 
     // Enable tab when document is ready
     $(document).ready(Tap.enable);
+
+    // Configurable options
+    $.tap = {
+        POSITION_DELTA: 10, // Max distance between touchstart and touchend to be considered a tap
+        TIME_DELTA: 400, // Max duration between touchstart and touchend to be considered a tap
+        LEFT_BUTTON_ONLY: true // Only accept left mouse button actions
+    };
 
 }(document, jQuery));
