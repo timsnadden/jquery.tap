@@ -297,7 +297,7 @@
          * @param {jQuery.Event} e
          */
         onStart: function(e) {
-            if (e.isTrigger) {
+            if (e.isTrigger || (e.type.indexOf('mouse') === 0 && e.which !== 1)) {
                 return;
             }
 
