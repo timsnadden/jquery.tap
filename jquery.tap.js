@@ -30,7 +30,16 @@
  * @author Aaron Gloege
  * @version 1.1.0
  */
-(function(document, $) {
+
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function($) {
     'use strict';
 
     /**
@@ -394,4 +403,4 @@
         LEFT_BUTTON_ONLY: true // Only accept left mouse button actions
     };
 
-}(document, jQuery));
+}));
